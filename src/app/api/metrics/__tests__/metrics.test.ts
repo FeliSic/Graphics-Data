@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { NextRequest } from 'next/server';
 import type { MetricsSummary, UserData, SalesData, VisitData } from '@/types';
 
 // ---------------------------------------------------------------------------
@@ -57,7 +58,7 @@ describe('GET /api/metrics', () => {
   it('returns 200 with MetricsSummary body', async () => {
     const { GET } = await import('../route');
 
-    const req = new Request('http://localhost/api/metrics');
+    const req = new NextRequest('http://localhost/api/metrics');
     const res = await GET(req);
 
     expect(res.status).toBe(200);
@@ -73,7 +74,7 @@ describe('GET /api/metrics', () => {
 
     const { GET } = await import('../route');
 
-    const req = new Request('http://localhost/api/metrics');
+    const req = new NextRequest('http://localhost/api/metrics');
     const res = await GET(req);
 
     expect(res.status).toBe(500);
@@ -98,7 +99,7 @@ describe('GET /api/metrics/users', () => {
   it('returns 200 with UserData array', async () => {
     const { GET } = await import('../users/route');
 
-    const req = new Request('http://localhost/api/metrics/users');
+    const req = new NextRequest('http://localhost/api/metrics/users');
     const res = await GET(req);
 
     expect(res.status).toBe(200);
@@ -114,7 +115,7 @@ describe('GET /api/metrics/users', () => {
     mockGetUserData.mockRejectedValueOnce(new Error('Failure'));
 
     const { GET } = await import('../users/route');
-    const res = await GET(new Request('http://localhost/api/metrics/users'));
+    const res = await GET(new NextRequest('http://localhost/api/metrics/users'));
 
     expect(res.status).toBe(500);
   });
@@ -131,7 +132,7 @@ describe('GET /api/metrics/sales', () => {
   it('returns 200 with SalesData array', async () => {
     const { GET } = await import('../sales/route');
 
-    const req = new Request('http://localhost/api/metrics/sales');
+    const req = new NextRequest('http://localhost/api/metrics/sales');
     const res = await GET(req);
 
     expect(res.status).toBe(200);
@@ -147,7 +148,7 @@ describe('GET /api/metrics/sales', () => {
     mockGetSalesData.mockRejectedValueOnce(new Error('Failure'));
 
     const { GET } = await import('../sales/route');
-    const res = await GET(new Request('http://localhost/api/metrics/sales'));
+    const res = await GET(new NextRequest('http://localhost/api/metrics/sales'));
 
     expect(res.status).toBe(500);
   });
@@ -164,7 +165,7 @@ describe('GET /api/metrics/visits', () => {
   it('returns 200 with VisitData array', async () => {
     const { GET } = await import('../visits/route');
 
-    const req = new Request('http://localhost/api/metrics/visits');
+    const req = new NextRequest('http://localhost/api/metrics/visits');
     const res = await GET(req);
 
     expect(res.status).toBe(200);
@@ -179,7 +180,7 @@ describe('GET /api/metrics/visits', () => {
     mockGetVisitData.mockRejectedValueOnce(new Error('Failure'));
 
     const { GET } = await import('../visits/route');
-    const res = await GET(new Request('http://localhost/api/metrics/visits'));
+    const res = await GET(new NextRequest('http://localhost/api/metrics/visits'));
 
     expect(res.status).toBe(500);
   });
