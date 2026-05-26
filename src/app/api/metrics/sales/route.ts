@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
-import { generateSalesData } from '@/server/mockData';
+import pool from '@/server/database/db';
+import { getSalesData } from '@/server/database/models';
 
 export async function GET() {
   try {
-    const data = generateSalesData();
+    const data = await getSalesData(pool);
     return NextResponse.json(data);
   } catch {
     return NextResponse.json(
