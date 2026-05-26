@@ -2,18 +2,22 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { MetricsSummary, UserData, SalesData, VisitData } from '@/types';
 
 // ---------------------------------------------------------------------------
-// Mock mockData generators before importing route handlers
+// Mock database pool and models before importing route handlers
 // ---------------------------------------------------------------------------
-const mockGetMetricsSummary = vi.fn<() => MetricsSummary>();
-const mockGenerateUserData = vi.fn<() => UserData[]>();
-const mockGenerateSalesData = vi.fn<() => SalesData[]>();
-const mockGenerateVisitData = vi.fn<() => VisitData[]>();
+const mockGetMetricsSummary = vi.fn<() => Promise<MetricsSummary>>();
+const mockGetUserData = vi.fn<() => Promise<UserData[]>>();
+const mockGetSalesData = vi.fn<() => Promise<SalesData[]>>();
+const mockGetVisitData = vi.fn<() => Promise<VisitData[]>>();
 
-vi.mock('@/server/mockData', () => ({
+vi.mock('@/server/database/db', () => ({
+  default: { query: vi.fn() },
+}));
+
+vi.mock('@/server/database/models', () => ({
   getMetricsSummary: mockGetMetricsSummary,
-  generateUserData: mockGenerateUserData,
-  generateSalesData: mockGenerateSalesData,
-  generateVisitData: mockGenerateVisitData,
+  getUserData: mockGetUserData,
+  getSalesData: mockGetSalesData,
+  getVisitData: mockGetVisitData,
 }));
 
 // ---------------------------------------------------------------------------
@@ -47,7 +51,7 @@ const sampleVisits: VisitData[] = [
 // ---------------------------------------------------------------------------
 describe('GET /api/metrics', () => {
   beforeEach(() => {
-    mockGetMetricsSummary.mockReturnValue(sampleSummary);
+    mockGetMetricsSummary.mockResolvedValue(sampleSummary);
   });
 
   it('returns 200 with MetricsSummary body', async () => {
@@ -65,9 +69,7 @@ describe('GET /api/metrics', () => {
   });
 
   it('returns 500 when generator throws', async () => {
-    mockGetMetricsSummary.mockImplementationOnce(() => {
-      throw new Error('DB failure');
-    });
+    mockGetMetricsSummary.mockRejectedValueOnce(new Error('DB failure'));
 
     const { GET } = await import('../route');
 
@@ -90,7 +92,7 @@ describe('GET /api/metrics', () => {
 // ---------------------------------------------------------------------------
 describe('GET /api/metrics/users', () => {
   beforeEach(() => {
-    mockGenerateUserData.mockReturnValue(sampleUsers);
+    mockGetUserData.mockResolvedValue(sampleUsers);
   });
 
   it('returns 200 with UserData array', async () => {
@@ -109,9 +111,7 @@ describe('GET /api/metrics/users', () => {
   });
 
   it('returns 500 when generator throws', async () => {
-    mockGenerateUserData.mockImplementationOnce(() => {
-      throw new Error('Failure');
-    });
+    mockGetUserData.mockRejectedValueOnce(new Error('Failure'));
 
     const { GET } = await import('../users/route');
     const res = await GET(new Request('http://localhost/api/metrics/users'));
@@ -125,7 +125,7 @@ describe('GET /api/metrics/users', () => {
 // ---------------------------------------------------------------------------
 describe('GET /api/metrics/sales', () => {
   beforeEach(() => {
-    mockGenerateSalesData.mockReturnValue(sampleSales);
+    mockGetSalesData.mockResolvedValue(sampleSales);
   });
 
   it('returns 200 with SalesData array', async () => {
@@ -144,9 +144,7 @@ describe('GET /api/metrics/sales', () => {
   });
 
   it('returns 500 when generator throws', async () => {
-    mockGenerateSalesData.mockImplementationOnce(() => {
-      throw new Error('Failure');
-    });
+    mockGetSalesData.mockRejectedValueOnce(new Error('Failure'));
 
     const { GET } = await import('../sales/route');
     const res = await GET(new Request('http://localhost/api/metrics/sales'));
@@ -160,7 +158,7 @@ describe('GET /api/metrics/sales', () => {
 // ---------------------------------------------------------------------------
 describe('GET /api/metrics/visits', () => {
   beforeEach(() => {
-    mockGenerateVisitData.mockReturnValue(sampleVisits);
+    mockGetVisitData.mockResolvedValue(sampleVisits);
   });
 
   it('returns 200 with VisitData array', async () => {
@@ -178,9 +176,7 @@ describe('GET /api/metrics/visits', () => {
   });
 
   it('returns 500 when generator throws', async () => {
-    mockGenerateVisitData.mockImplementationOnce(() => {
-      throw new Error('Failure');
-    });
+    mockGetVisitData.mockRejectedValueOnce(new Error('Failure'));
 
     const { GET } = await import('../visits/route');
     const res = await GET(new Request('http://localhost/api/metrics/visits'));
