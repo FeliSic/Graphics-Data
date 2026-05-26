@@ -1,9 +1,10 @@
-import { NextResponse } from 'next/server';
-import { generateVisitData } from '@/server/mockData';
+import { NextRequest, NextResponse } from 'next/server';
+import pool from '@/server/database/db';
+import { getVisitData } from '@/server/database/models';
 
-export async function GET() {
+export async function GET(_request: NextRequest) {
   try {
-    const data = generateVisitData();
+    const data = await getVisitData(pool);
     return NextResponse.json(data);
   } catch {
     return NextResponse.json(
