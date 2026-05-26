@@ -1,0 +1,59 @@
+# openspec/config.yaml
+schema: spec-driven
+
+context: |
+  Tech stack:
+    - Next.js 16.2.4 (App Router), React 19.2.4
+    - TypeScript 5.x (strict mode), Tailwind CSS v4
+    - Path alias @/* → project root
+    - ESLint 9.x with eslint-config-next (core-web-vitals + TypeScript)
+    - No formatter configured
+    - npm package manager
+
+  Architecture:
+    - src/app/api/  → Route Handlers (empty, to be built)
+    - src/app/      → Pages and layouts
+    - src/server/   → Server-side logic (mock data engine)
+    - src/server/database/ → Placeholder stubs (ignored, reserved for future versions)
+    - src/types/    → Shared interfaces
+    - Mock data from src/server/mockData.ts
+    - Components: DashboardClient.tsx, MetricCard.tsx, Recharts charts
+    - Data fetching: SWR with 10s refreshInterval
+    - No database/ORM — pure mock data
+
+  Testing:
+    - Test runner: Vitest + @testing-library/react + jsdom
+    - No test files exist yet (to be created alongside implementation)
+    - No coverage tool configured
+    - No CI pipeline
+    - .gitignore lists /coverage (anticipating future coverage)
+
+  Style:
+    - Conventional: kebab-case for files, PascalCase for components
+    - 'use client' directive on all Recharts chart components
+    - Responsive grid: 1 col mobile / 2 tablet / 3 desktop
+
+rules:
+  proposal:
+    - Include rollback plan for changes that touch API contracts
+    - Scope must be bounded: no cross-cutting concerns in one change
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+  design:
+    - Document component tree and data flow for UI changes
+    - Include mock data shape for new endpoints
+  tasks:
+    - Group by phase, use hierarchical numbering
+    - Keep tasks completable in one session
+  apply:
+    - Follow existing code patterns
+    - Install SWR + Recharts before using them
+    tdd: true
+    test_command: "npx vitest run"
+  verify:
+    test_command: "npx vitest run"
+    build_command: "npm run build"
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas
