@@ -35,15 +35,37 @@ Contract for the 5 client components rendering the metrics dashboard: `MetricCar
 - WHEN the component renders
 - THEN `0` MUST be visible as the value
 
-### Requirement: UserChart — User Growth Chart
+### Requirement: MetricCard — Breakdown Mode (Optional)
 
-`UserChart` MUST accept `UserData[]` as its `data` prop and MUST render a Recharts `BarChart` or `AreaChart`.
+`MetricCard` MAY accept `weekendValue`, `weekdayValue`, and `totalValue` as optional numeric props. When all three are present alongside `title`, it MUST render:
+- A horizontal proportional bar showing the weekend vs weekday share
+- A legend line containing `Finde: {weekendValue} | Semana: {weekdayValue} | Total: {totalValue}`
 
-#### Scenario: Renders chart with user data
+When these props are absent (legacy mode with only `title` and `value`), the original behavior MUST be preserved.
 
-- GIVEN a non-empty array of `UserData`
+#### Scenario: Renders breakdown bar and legend
+
+- GIVEN `weekendValue=30`, `weekdayValue=70`, `totalValue=100`, and `loading=false`
+- WHEN the component renders
+- THEN a proportional bar MUST be visible
+- AND the legend MUST display "Finde: 30 | Semana: 70 | Total: 100"
+
+#### Scenario: Legacy mode compatibility
+
+- GIVEN only `title` and `value` props (no `weekendValue`, `weekdayValue`, or `totalValue`)
+- WHEN the component renders
+- THEN it MUST render the original single-value card without breakdown bar or legend
+
+### Requirement: UserChart — Grouped Bar Chart
+
+`UserChart` MUST accept `UserData[]` with `is_weekend` field. It MUST render a Recharts `BarChart` with two bars per month: weekend users and weekday users. The chart MUST group bars by month with separate Recharts `Bar` components for each series.
+
+#### Scenario: Renders grouped bars for weekend and weekday
+
+- GIVEN a non-empty array of `UserData` containing entries with both `is_weekend: true` and `is_weekend: false`
 - WHEN `UserChart` renders
 - THEN a Recharts `BarChart` MUST be mounted
+- AND two `Bar` components MUST be present (weekend and weekday series)
 
 #### Scenario: Empty data array
 
@@ -51,15 +73,18 @@ Contract for the 5 client components rendering the metrics dashboard: `MetricCar
 - WHEN `UserChart` renders
 - THEN the chart SHOULD render without error
 
-### Requirement: SalesChart — Sales Distribution Chart
+### Requirement: SalesChart — Two PieCharts Side by Side
 
-`SalesChart` MUST accept `SalesData[]` as its `data` prop and MUST render a Recharts `PieChart`.
+`SalesChart` MUST accept `SalesData[]` with `is_weekend` field. It MUST render two Recharts `PieChart` components side by side: one for weekend sales composition and one for weekday sales composition. Each PieChart MUST use `amount` as `dataKey` and `category` as `nameKey`.
 
-#### Scenario: Renders pie chart with sales data
+#### Scenario: Renders two PieCharts for weekend and weekday composition
 
-- GIVEN a non-empty array of `SalesData`
+- GIVEN a non-empty array of `SalesData` containing entries with both `is_weekend: true` and `is_weekend: false`
 - WHEN `SalesChart` renders
-- THEN a Recharts `PieChart` MUST be mounted
+- THEN two Recharts `PieChart` components MUST be mounted
+- AND the first PieChart MUST show weekend data (`is_weekend: true`)
+- AND the second PieChart MUST show weekday data (`is_weekend: false`)
+- AND each PieChart MUST use `amount` as `dataKey` and `category` as `nameKey`
 
 #### Scenario: Empty data array
 
@@ -67,15 +92,17 @@ Contract for the 5 client components rendering the metrics dashboard: `MetricCar
 - WHEN `SalesChart` renders
 - THEN the chart SHOULD render without error
 
-### Requirement: VisitsChart — Visit History Chart
+### Requirement: VisitsChart — Two-Line Chart
 
-`VisitsChart` MUST accept `VisitData[]` as its `data` prop and MUST render a Recharts `LineChart`.
+`VisitsChart` MUST accept `VisitData[]` with `is_weekend` field. It MUST render a Recharts `LineChart` with two lines: weekend visits (blue) and weekday visits (green). XAxis tick labels MUST display dates in `YYYY-MM-DD` format without timezone suffix.
 
-#### Scenario: Renders line chart with visit data
+#### Scenario: Renders two lines for weekend and weekday
 
-- GIVEN a non-empty array of `VisitData`
+- GIVEN a non-empty array of `VisitData` containing entries with both `is_weekend: true` and `is_weekend: false`
 - WHEN `VisitsChart` renders
 - THEN a Recharts `LineChart` MUST be mounted
+- AND two `Line` components MUST be present (weekend and weekday series)
+- AND XAxis labels MUST be in `YYYY-MM-DD` format
 
 #### Scenario: Empty data array
 

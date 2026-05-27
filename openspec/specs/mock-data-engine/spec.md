@@ -24,10 +24,10 @@ This ensures no floating-point creep in the mock data layer.
 
 | Interface | Fields |
 |-----------|--------|
-| `UserData` | `month: string`, `newUsers: number` (integer), `totalUsers: number` (integer) |
-| `SalesData` | `category: string`, `amount: number` (integer), `percentage: number` (integer, 0–100) |
-| `VisitData` | `date: string`, `visits: number` (integer) |
-| `MetricsSummary` | `totalUsers: number` (integer), `activeUsers: number` (integer), `totalSales: number` (integer), `totalVisits: number` (integer), `conversionRate: number` (integer, 0–100, percentage) |
+| `UserData` | `month: string`, `newUsers: number` (integer), `totalUsers: number` (integer), `is_weekend: boolean` |
+| `SalesData` | `category: string`, `amount: number` (integer), `percentage: number` (integer, 0–100), `is_weekend: boolean` |
+| `VisitData` | `date: string`, `visits: number` (integer), `is_weekend: boolean` |
+| `MetricsSummary` | 15 integer fields in 3 groups: **Total** (`totalUsers`, `activeUsers`, `totalSales`, `totalVisits`, `conversionRate`), **Weekend** (`weekendUsers`, `weekendSales`, `weekendVisits`, `weekendActiveUsers`, `weekendConversionRate`), **Weekday** (`weekdayUsers`, `weekdaySales`, `weekdayVisits`, `weekdayActiveUsers`, `weekdayConversionRate`) |
 
 #### Scenario: All interfaces are importable
 
@@ -40,6 +40,12 @@ This ensures no floating-point creep in the mock data layer.
 - GIVEN any instance of `UserData`, `SalesData`, or `VisitData`
 - WHEN inspecting all numeric fields
 - THEN each MUST be an integer >= 0
+
+#### Scenario: is_weekend boolean field exists
+
+- GIVEN any instance of `UserData`, `SalesData`, or `VisitData`
+- WHEN inspecting its fields
+- THEN `is_weekend` MUST be present and be of type `boolean`
 
 ### Requirement: User Data Generation
 
@@ -104,20 +110,30 @@ This ensures no floating-point creep in the mock data layer.
 
 ### Requirement: Metrics Summary
 
-`getMetricsSummary()` MUST derive its KPIs from the three generator functions:
+`getMetricsSummary()` MUST return an object with 15 fields across 3 groups. Total fields MUST equal the sum of their weekend and weekday counterparts.
 
-| Field | Derivation |
-|-------|-----------|
-| `totalUsers` | MUST equal the last `UserData.totalUsers` |
-| `totalVisits` | MUST equal the sum of all `VisitData.visits` |
-| `totalSales` | MUST equal the sum of all `SalesData.amount` |
-| `conversionRate` | MUST be an integer between 0 and 100 (percentage), computed via `Math.round()` |
+| Field Group | Fields | Integrity |
+|-------------|--------|-----------|
+| Total | `totalUsers`, `activeUsers`, `totalSales`, `totalVisits`, `conversionRate` | MUST equal weekend + weekday sum |
+| Weekend | `weekendUsers`, `weekendSales`, `weekendVisits`, `weekendActiveUsers`, `weekendConversionRate` | MUST derive from weekend subset |
+| Weekday | `weekdayUsers`, `weekdaySales`, `weekdayVisits`, `weekdayActiveUsers`, `weekdayConversionRate` | MUST derive from weekday subset |
 
-#### Scenario: Derived values match source data
+All 15 fields MUST be integers >= 0. Rate fields (`conversionRate`, `weekendConversionRate`, `weekdayConversionRate`) MUST be integers in [0, 100], computed via `Math.round()`.
+
+#### Scenario: Total equals weekend + weekday for every metric
 
 - GIVEN a call to `getMetricsSummary()`
-- WHEN comparing each KPI to the output of `generateUserData()`, `generateSalesData()`, and `generateVisitData()`
-- THEN every field MUST be mathematically consistent with its source
+- WHEN comparing each total to its weekend + weekday breakdown
+- THEN `totalUsers` MUST equal `weekendUsers` + `weekdayUsers`
+- AND `activeUsers` MUST equal `weekendActiveUsers` + `weekdayActiveUsers`
+- AND `totalSales` MUST equal `weekendSales` + `weekdaySales`
+- AND `totalVisits` MUST equal `weekendVisits` + `weekdayVisits`
+
+#### Scenario: Rate fields are valid percentages
+
+- GIVEN any call to `getMetricsSummary()`
+- WHEN inspecting `conversionRate`, `weekendConversionRate`, and `weekdayConversionRate`
+- THEN each MUST be an integer between 0 and 100
 
 ### Requirement: Data Stability
 
