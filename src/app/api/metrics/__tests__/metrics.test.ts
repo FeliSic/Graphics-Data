@@ -30,21 +30,36 @@ const sampleSummary: MetricsSummary = {
   totalSales: 12000,
   totalVisits: 18600,
   conversionRate: 82,
+  weekendUsers: 350,
+  weekendSales: 5000,
+  weekendVisits: 8400,
+  weekendActiveUsers: 300,
+  weekendConversionRate: 44,
+  weekdayUsers: 450,
+  weekdaySales: 7000,
+  weekdayVisits: 10200,
+  weekdayActiveUsers: 356,
+  weekdayConversionRate: 56,
 };
 
 const sampleUsers: UserData[] = [
-  { month: '2024-01', newUsers: 120, totalUsers: 120 },
-  { month: '2024-02', newUsers: 135, totalUsers: 255 },
+  { month: '2024-01', newUsers: 120, totalUsers: 120, is_weekend: true },
+  { month: '2024-01', newUsers: 80, totalUsers: 80, is_weekend: false },
+  { month: '2024-02', newUsers: 135, totalUsers: 255, is_weekend: true },
+  { month: '2024-02', newUsers: 90, totalUsers: 170, is_weekend: false },
 ];
 
 const sampleSales: SalesData[] = [
-  { category: 'Electrónica', amount: 4500, percentage: 38 },
-  { category: 'Ropa', amount: 3200, percentage: 27 },
+  { category: 'Electrónica', amount: 2500, percentage: 42, is_weekend: true },
+  { category: 'Ropa', amount: 2000, percentage: 33, is_weekend: true },
+  { category: 'Electrónica', amount: 2000, percentage: 36, is_weekend: false },
+  { category: 'Ropa', amount: 1200, percentage: 32, is_weekend: false },
 ];
 
 const sampleVisits: VisitData[] = [
-  { date: '2024-01-01', visits: 855 },
-  { date: '2024-01-02', visits: 842 },
+  { date: '2024-01-06', visits: 420, is_weekend: true },
+  { date: '2024-01-07', visits: 415, is_weekend: true },
+  { date: '2024-01-08', visits: 855, is_weekend: false },
 ];
 
 // ---------------------------------------------------------------------------
@@ -55,7 +70,7 @@ describe('GET /api/metrics', () => {
     mockGetMetricsSummary.mockResolvedValue(sampleSummary);
   });
 
-  it('returns 200 with MetricsSummary body', async () => {
+  it('returns 200 with MetricsSummary body containing 15 fields', async () => {
     const { GET } = await import('../route');
 
     const req = new NextRequest('http://localhost/api/metrics');
@@ -64,9 +79,23 @@ describe('GET /api/metrics', () => {
     expect(res.status).toBe(200);
     const body = (await res.json()) as MetricsSummary;
     expect(body).toEqual(sampleSummary);
+
+    // Verify all 15 fields are present
     expect(body).toHaveProperty('totalUsers');
+    expect(body).toHaveProperty('activeUsers');
     expect(body).toHaveProperty('totalSales');
+    expect(body).toHaveProperty('totalVisits');
     expect(body).toHaveProperty('conversionRate');
+    expect(body).toHaveProperty('weekendUsers');
+    expect(body).toHaveProperty('weekendSales');
+    expect(body).toHaveProperty('weekendVisits');
+    expect(body).toHaveProperty('weekendActiveUsers');
+    expect(body).toHaveProperty('weekendConversionRate');
+    expect(body).toHaveProperty('weekdayUsers');
+    expect(body).toHaveProperty('weekdaySales');
+    expect(body).toHaveProperty('weekdayVisits');
+    expect(body).toHaveProperty('weekdayActiveUsers');
+    expect(body).toHaveProperty('weekdayConversionRate');
   });
 
   it('returns 500 when generator throws', async () => {
@@ -96,7 +125,7 @@ describe('GET /api/metrics/users', () => {
     mockGetUserData.mockResolvedValue(sampleUsers);
   });
 
-  it('returns 200 with UserData array', async () => {
+  it('returns 200 with UserData array including is_weekend', async () => {
     const { GET } = await import('../users/route');
 
     const req = new NextRequest('http://localhost/api/metrics/users');
@@ -109,6 +138,7 @@ describe('GET /api/metrics/users', () => {
     expect(body[0]).toHaveProperty('month');
     expect(body[0]).toHaveProperty('newUsers');
     expect(body[0]).toHaveProperty('totalUsers');
+    expect(body[0]).toHaveProperty('is_weekend');
   });
 
   it('returns 500 when generator throws', async () => {
@@ -129,7 +159,7 @@ describe('GET /api/metrics/sales', () => {
     mockGetSalesData.mockResolvedValue(sampleSales);
   });
 
-  it('returns 200 with SalesData array', async () => {
+  it('returns 200 with SalesData array including is_weekend', async () => {
     const { GET } = await import('../sales/route');
 
     const req = new NextRequest('http://localhost/api/metrics/sales');
@@ -142,6 +172,7 @@ describe('GET /api/metrics/sales', () => {
     expect(body[0]).toHaveProperty('category');
     expect(body[0]).toHaveProperty('amount');
     expect(body[0]).toHaveProperty('percentage');
+    expect(body[0]).toHaveProperty('is_weekend');
   });
 
   it('returns 500 when generator throws', async () => {
@@ -162,7 +193,7 @@ describe('GET /api/metrics/visits', () => {
     mockGetVisitData.mockResolvedValue(sampleVisits);
   });
 
-  it('returns 200 with VisitData array', async () => {
+  it('returns 200 with VisitData array including is_weekend', async () => {
     const { GET } = await import('../visits/route');
 
     const req = new NextRequest('http://localhost/api/metrics/visits');
@@ -174,6 +205,7 @@ describe('GET /api/metrics/visits', () => {
     expect(body.length).toBeGreaterThan(0);
     expect(body[0]).toHaveProperty('date');
     expect(body[0]).toHaveProperty('visits');
+    expect(body[0]).toHaveProperty('is_weekend');
   });
 
   it('returns 500 when generator throws', async () => {

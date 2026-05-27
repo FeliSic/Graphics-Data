@@ -56,21 +56,33 @@ export default function DashboardClient() {
         <MetricCard
           title="Usuarios Totales"
           value={summary?.totalUsers ?? 0}
+          weekendValue={summary?.weekendUsers}
+          weekdayValue={summary?.weekdayUsers}
+          totalValue={summary?.totalUsers}
           loading={loadingSummary}
         />
         <MetricCard
           title="Ventas Totales"
           value={summary?.totalSales ?? 0}
+          weekendValue={summary?.weekendSales}
+          weekdayValue={summary?.weekdaySales}
+          totalValue={summary?.totalSales}
           loading={loadingSales}
         />
         <MetricCard
           title="Visitas Totales"
           value={summary?.totalVisits ?? 0}
+          weekendValue={summary?.weekendVisits}
+          weekdayValue={summary?.weekdayVisits}
+          totalValue={summary?.totalVisits}
           loading={loadingVisits}
         />
         <MetricCard
           title="Tasa de Conversión"
           value={summary ? `${summary.conversionRate}%` : '0%'}
+          weekendValue={summary?.weekendConversionRate}
+          weekdayValue={summary?.weekdayConversionRate}
+          totalValue={summary?.conversionRate}
           loading={loadingSummary}
         />
       </div>
